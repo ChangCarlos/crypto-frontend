@@ -1,9 +1,10 @@
 import { ChevronRight } from "lucide-react";
-import { Coin, CoinAlias, CoinImg, CoinInfo, CoinName, CoinTrendItem, CoinValue, Divider, MarketTrendContainer, MarketTrendContent, MarketTrendTitle, Percent, Value, ValueContainer } from "./MarketTrend"
+import { Coin, CoinAlias, CoinImg, CoinInfo, CoinName, CoinTrendItem, CoinValue, Divider, MarketTrendContainer, MarketTrendContent, MarketTrendTitle, Percent, Value, ValueContainer, LoaderContainer } from "./MarketTrend"
 import { useState, useEffect } from "react";
 import { getCryptos } from "../../services/coinMarketCap";
 import { getCryptoChart } from "../../services/coinGecko";
 import CoinChart from "../CoinChart";
+import { ClipLoader } from "react-spinners";
 
 
 const coinGeckoIds = {
@@ -16,9 +17,12 @@ const coinGeckoIds = {
 
 const MarketTrend = () => {
     const [coins, setCoins] = useState([])
+    const [loading, setLoading] = useState(true);
+
 
     useEffect(() => {
         const fetchData = async () => {
+            setLoading(true)
             const data = await getCryptos()
 
             const withChartData = await Promise.all(
@@ -29,10 +33,27 @@ const MarketTrend = () => {
             );
 
             setCoins(withChartData);
+            setLoading(false)
         }
 
         fetchData()
     }, [])
+
+    if (loading) {
+        return (
+            <MarketTrendContainer>
+
+                <MarketTrendTitle>
+                    Market Trend
+                </MarketTrendTitle>
+                <LoaderContainer>
+                <MarketTrendContent>
+                        <ClipLoader size={60} color="#8ec649" />
+                </MarketTrendContent>
+                </LoaderContainer>
+            </MarketTrendContainer>
+        );
+    }
 
     return (
         <MarketTrendContainer>
@@ -56,7 +77,7 @@ const MarketTrend = () => {
                                 <Value>{coin.value}</Value>
                                 <Percent>{coin.percent}</Percent>
                             </ValueContainer>
-                           {coin.chart && <CoinChart data={coin.chartData} />}
+                            {coin.chart && <CoinChart data={coin.chartData} />}
                         </CoinValue>
                     </CoinTrendItem>
                 ))}

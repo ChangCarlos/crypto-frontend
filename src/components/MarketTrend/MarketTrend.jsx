@@ -108,3 +108,10 @@ export const Chart = styled.img`
     width: 100px;
     height: 53px;
 `
+
+export const LoaderContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 30vh;
+`;

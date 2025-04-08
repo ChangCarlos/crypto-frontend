@@ -12,7 +12,7 @@ export const getCryptos = async () => {
       name: coin.name,
       value: `$${coin.quote.USD.price.toFixed(2)}`,
       percent: `${coin.quote.USD.percent_change_24h.toFixed(2)}%`,
-      icon: `/public/${symbol.toLowerCase()}-icon.png`,
+      icon: `/${symbol.toLowerCase()}-icon.png`,
       chart: `/public/chart-state-${symbol.toLowerCase()}.png`
     }));
   } catch (error) {

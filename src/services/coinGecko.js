@@ -1,13 +1,18 @@
 import axios from "axios";
 
-const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+const API_URL = "http://localhost:5000/api";
+
+export const getMarketTrend = async () => {
+  const response = await axios.get(`${API_URL}/market-trend`);
+  return response.data;
+};
+
+export const getMarketUpdate = async () => {
+  const response = await axios.get(`${API_URL}/market-update`);
+  return response.data;
+};
 
 export const getCryptoChart = async (coinId) => {
-  try {
-    const res = await axios.get(`${BASE_URL}/api/chart/${coinId}`);
-    return res.data;
-  } catch (err) {
-    console.error("Erro ao buscar gráfico:", err);
-    return [];
-  }
+  const response = await axios.get(`${API_URL}/chart/${coinId}`);
+  return response.data;
 };

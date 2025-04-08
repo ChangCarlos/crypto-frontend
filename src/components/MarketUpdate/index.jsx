@@ -1,8 +1,15 @@
+import { useEffect, useState } from "react";
+import { getMarketUpdate, getCryptoChart } from "../../services/coinGecko";
+import {
+    MarketContainer, Title, CategoryContainer, CategoriesTitle,
+    CategoriesNavBar, Categories, Category, SearchContainer,
+    SearchInput, TableCrypto, TableHeader, TableHeaderRow,
+    TableRow, TableCell, CoinInfo, CoinImg, CoinText, Chart,
+    TradeButton, SeeAllLink, NoResults
+} from "./MarketUpdate";
 import { Search } from "lucide-react";
-import { Categories, CategoriesNavBar, CategoriesTitle, Category, CategoryContainer, Chart, CoinImg, MarketContainer, SearchContainer, SearchInput, TableCrypto, TableHeader, Title, TradeButton, TableRow, TableCell, TableHeaderRow, CoinInfo, CoinText, SeeAllLink, NoResults } from "./MarketUpdate";
-import { useState } from "react";
 
-const allCategories = [
+const categoriesList = [
     'Popular',
     'Metaverse',
     'Entertainment',
@@ -12,230 +19,122 @@ const allCategories = [
     'See All 12+'
 ]
 
-const allCoins = [
-    {
-        id: 1,
-        img: '/btc-icon.png',
-        name: 'Bitcoin',
-        alias: 'BTC',
-        value: '$56,623.54',
-        percent: '1.41%',
-        chart: '/chart-state-1.png'
-    },
-    {
-        id: 2,
-        img: '/eth-icon.png',
-        name: 'Ethereum',
-        alias: 'ETH',
-        value: '$4,267.90',
-        percent: '2.22%',
-        chart: '/chart-state-2.png'
-    },
-    {
-        id: 3,
-        img: '/bnb-icon.png',
-        name: 'Binance',
-        alias: 'BNB',
-        value: '$587.74',
-        percent: '-0.82%',
-        chart: '/chart-state-3.png'
-    },
-    {
-        id: 4,
-        img: '/usdt-icon.png',
-        name: 'Tether',
-        alias: 'USDT',
-        value: '$0.9998',
-        percent: '-0.03%',
-        chart: '/chart-state-4.png'
-    },
-    {
-        id: 5,
-        img: '/sol-icon.png',
-        name: 'Solana',
-        alias: 'SOL',
-        value: '$213.67',
-        percent: '-0.53%',
-        chart: '/chart-state-5.png'
-    },
-    {
-        id: 6,
-        img: '/xrp-icon.png',
-        name: 'XRP',
-        alias: 'XRP',
-        value: '$1.04',
-        percent: '-0.44%',
-        chart: '/chart-state-6.png'
-    },
-    {
-        id: 7,
-        img: '/usdc-icon.png',
-        name: 'USD Coin',
-        alias: 'USDC',
-        value: '$1.00',
-        percent: '-0.03%',
-        chart: '/chart-state-7.png'
-    },
-]
-
 const MarketUpdate = () => {
-    const [search, setSearch] = useState('')
-    const filteredCoins = allCoins.filter(coin =>
+    const [coins, setCoins] = useState([]);
+    const [search, setSearch] = useState("");
+
+    useEffect(() => {
+        const fetchCoins = async () => {
+            const data = await getMarketUpdate();
+
+            const formatted = await Promise.all(data.map(async (coin, index) => {
+                try {
+                    const chartData = await getCryptoChart(coin.id);
+
+                    return {
+                        id: index + 1,
+                        img: coin.image,
+                        name: coin.name,
+                        alias: coin.symbol.toUpperCase(),
+                        value: `$${coin.current_price.toLocaleString()}`,
+                        percent: `${coin.price_change_percentage_24h.toFixed(2)}%`,
+                        chart: chartData 
+                    };
+                } catch (error) {
+                    console.error(`Erro ao buscar gráfico de ${coin.id}:`, error.message);
+
+                    return {
+                        id: index + 1,
+                        img: coin.image,
+                        name: coin.name,
+                        alias: coin.symbol.toUpperCase(),
+                        value: `$${coin.current_price.toLocaleString()}`,
+                        percent: `${coin.price_change_percentage_24h.toFixed(2)}%`,
+                        chart: null
+                    };
+                }
+            }));
+
+            setCoins(formatted);
+        };
+
+        fetchCoins();
+    }, []);
+
+    const filteredCoins = coins.filter((coin) =>
         coin.name.toLowerCase().includes(search.toLowerCase()) ||
         coin.alias.toLowerCase().includes(search.toLowerCase())
-    )
-
-    const categories = allCategories.map((category, index) => (
-        <Category key={index}>{category}</Category>
-    ));
-
-
+    );
 
     return (
         <MarketContainer>
-            <Title>
-                Market Update
-            </Title>
+            <Title>Market Update</Title>
             <CategoryContainer>
-                <CategoriesTitle>
-                    Cryptocurrency Categories
-                </CategoriesTitle>
+                <CategoriesTitle>Cryptocurrency Categories</CategoriesTitle>
                 <CategoriesNavBar>
                     <Categories>
-                        {categories}
+                        {categoriesList.map((cat, i) => <Category key={i}>{cat}</Category>)}
                     </Categories>
                     <SearchContainer>
-                        <Search
-                            size={24}
-                            color="#B6B6B6"
-                        />
+                        <Search size={24} color="#B6B6B6" />
                         <SearchInput
                             type="text"
                             placeholder="Search Coin"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
-
                     </SearchContainer>
                 </CategoriesNavBar>
             </CategoryContainer>
 
-            {search === '' && (
-                <TableCrypto>
-                    <thead>
-                        <TableHeaderRow>
-                            <TableHeader>NO</TableHeader>
-                            <TableHeader>NAME</TableHeader>
-                            <TableHeader>LAST PRICE</TableHeader>
-                            <TableHeader>CHANGE</TableHeader>
-                            <TableHeader>MARKET STATS</TableHeader>
-                            <TableHeader>TRADE</TableHeader>
-                        </TableHeaderRow>
-                    </thead>
-                    <tbody>
-                        {allCoins.map((coin) => (
-                            <TableRow key={coin.id}>
-                                <TableCell>
-                                    {coin.id}
-                                </TableCell>
-                                <TableCell>
-                                    <CoinInfo>
-                                        <CoinImg
-                                            src={coin.img}
-                                            alt={coin.name}
-                                        />
-                                        <CoinText>
-                                            {coin.name} <span>{coin.alias}</span>
-                                        </CoinText>
-                                    </CoinInfo>
-                                </TableCell>
-                                <TableCell>
-                                    {coin.value}
-                                </TableCell>
-                                <TableCell>
-                                    {coin.percent}
-                                </TableCell>
-                                <TableCell>
+            <TableCrypto>
+                <thead>
+                    <TableHeaderRow>
+                        <TableHeader>NO</TableHeader>
+                        <TableHeader>NAME</TableHeader>
+                        <TableHeader>LAST PRICE</TableHeader>
+                        <TableHeader>CHANGE</TableHeader>
+                        <TableHeader>MARKET STATS</TableHeader>
+                        <TableHeader>TRADE</TableHeader>
+                    </TableHeaderRow>
+                </thead>
+                <tbody>
+                    {(search ? filteredCoins : coins).map((coin) => (
+                        <TableRow key={coin.id}>
+                            <TableCell>{coin.id}</TableCell>
+                            <TableCell>
+                                <CoinInfo>
+                                    <CoinImg src={coin.img} alt={coin.name} />
+                                    <CoinText>
+                                        {coin.name} <span>{coin.alias}</span>
+                                    </CoinText>
+                                </CoinInfo>
+                            </TableCell>
+                            <TableCell>{coin.value}</TableCell>
+                            <TableCell>{coin.percent}</TableCell>
+                            <TableCell>
+                                {coin.chart ? (
                                     <Chart
-                                        src={coin.chart}
+                                        as="img"
+                                        src="/chart-placeholder.png"
                                         alt="Chart"
                                     />
-                                </TableCell>
-                                <TableCell>
-                                    <TradeButton>Trade</TradeButton>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </tbody>
-                </TableCrypto>
-            )}
+                                ) : (
+                                    <span style={{ fontSize: '0.75rem', color: '#999' }}>Gráfico indisponível</span>
+                                )}
+                            </TableCell>
+                            <TableCell>
+                                <TradeButton>Trade</TradeButton>
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </tbody>
+            </TableCrypto>
 
-            {search && (
-                <TableCrypto>
-                    <thead>
-                        <TableHeaderRow>
-                            <TableHeader>NO</TableHeader>
-                            <TableHeader>NAME</TableHeader>
-                            <TableHeader>LAST PRICE</TableHeader>
-                            <TableHeader>CHANGE</TableHeader>
-                            <TableHeader>MARKET STATS</TableHeader>
-                            <TableHeader>TRADE</TableHeader>
-                        </TableHeaderRow>
-                    </thead>
-
-                    {filteredCoins.length > 0 ? (
-                        filteredCoins.map((coin, index) => (
-                            <>
-                                <tbody>
-                                    <TableRow key={coin.id}>
-                                        <TableCell>
-                                            {coin.id}
-                                        </TableCell>
-                                        <TableCell>
-                                            <CoinInfo>
-                                                <CoinImg
-                                                    src={coin.img}
-                                                    alt={coin.name}
-                                                />
-                                                <CoinText>
-                                                    {coin.name} <span>{coin.alias}</span>
-                                                </CoinText>
-                                            </CoinInfo>
-                                        </TableCell>
-                                        <TableCell>
-                                            {coin.value}
-                                        </TableCell>
-                                        <TableCell>
-                                            {coin.percent}
-                                        </TableCell>
-                                        <TableCell>
-                                            <Chart
-                                                src={coin.chart}
-                                                alt="Chart"
-                                            />
-                                        </TableCell>
-                                        <TableCell>
-                                            <TradeButton>Trade</TradeButton>
-                                        </TableCell>
-                                    </TableRow>
-                                </tbody>
-                            </>
-                        ))
-                    ) : (
-                        <NoResults>
-                            Nenhum resultado encontrado
-                        </NoResults>
-                    )}
-                </TableCrypto>
-            )}
-
-            <SeeAllLink>
-                See All Coins
-            </SeeAllLink>
+            {!filteredCoins.length && search && <NoResults>Nenhum resultado encontrado</NoResults>}
+            <SeeAllLink>See All Coins</SeeAllLink>
         </MarketContainer>
     );
 };
-
-
 
 export default MarketUpdate;

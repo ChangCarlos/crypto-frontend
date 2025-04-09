@@ -8,12 +8,12 @@ import {
 } from "./MarketTrend";
 import { ChevronRight } from "lucide-react";
 
-const coinGeckoIds = {
-    BTC: "bitcoin",
-    ETH: "ethereum",
-    USDT: "tether",
-    BNB: "binancecoin"
-  };
+// const coinGeckoIds = {
+//     BTC: "bitcoin",
+//     ETH: "ethereum",
+//     USDT: "tether",
+//     BNB: "binancecoin"
+//   };
 
 const MarketTrend = () => {
   const [coins, setCoins] = useState([]);
@@ -47,7 +47,7 @@ const MarketTrend = () => {
             icon: coin.image,
             value: `$${coin.current_price.toLocaleString()}`,
             percent: `${coin.price_change_percentage_24h.toFixed(2)}%`,
-            chartData: null // Sem gráfico
+            chartData: null
           };
         }
       }));

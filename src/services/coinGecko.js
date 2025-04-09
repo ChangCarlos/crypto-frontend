@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = 'https://crypto-backend-j8rg.onrender.com';
 
 export const getMarketTrend = async () => {
   const response = await axios.get(`${API_URL}/api/market-trend`);

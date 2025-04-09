@@ -8,12 +8,12 @@ import {
 } from "./MarketTrend";
 import { ChevronRight } from "lucide-react";
 
-// const coinGeckoIds = {
-//     BTC: "bitcoin",
-//     ETH: "ethereum",
-//     USDT: "tether",
-//     BNB: "binancecoin"
-//   };
+const coinGeckoIds = {
+    BTC: "bitcoin",
+    ETH: "ethereum",
+    USDT: "tether",
+    BNB: "binancecoin"
+  };
 
 const MarketTrend = () => {
   const [coins, setCoins] = useState([]);
